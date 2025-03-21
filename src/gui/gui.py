@@ -40,6 +40,10 @@ if "select" not in st.session_state:
     st.session_state.select = options[0]
 if "use_reader" not in st.session_state:
     st.session_state.use_reader = True  # Giá trị mặc định
+if "use_hyde" not in st.session_state:
+    st.session_state.use_hyde = True  # Giá trị mặc định
+if "use_mmr" not in st.session_state:
+    st.session_state.use_mmr = True  # Giá trị mặc định
 
 st.title("Chatbot Luật Tài Chính")
 
@@ -61,6 +65,8 @@ selected_folder = st.selectbox(
 
 # Toggle button để chọn có sử dụng reader hay không
 st.session_state.use_reader = st.toggle("Dùng reader", value=st.session_state.use_reader)
+st.session_state.use_hyde = st.toggle("Dùng hyde", value=st.session_state.use_reader)
+st.session_state.use_mmr = st.toggle("Dùng mmr", value=st.session_state.use_reader)
 
 # Khởi tạo ChromaDB lần đầu với DB mặc định
 client = chromadb.PersistentClient(path=f"chromadb/{st.session_state.select}")
@@ -90,7 +96,7 @@ if prompt := st.chat_input("Hãy nhập vào yêu cầu?"):
             holder = st.empty()
 
             # Giả lập quá trình phản hồi từng ký tự
-            new_prompt, old_prompt = top_k(prompt, collection, phobert, tokenizer, device, k=5, use_reader=st.session_state.use_reader)
+            new_prompt, old_prompt = top_k(prompt, collection, phobert, tokenizer, device, k=10, use_reader=st.session_state.use_reader,use_hyde=st.session_state.use_hyde,use_mmr=st.session_state.use_mmr)
             print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", new_prompt)
             simulated_response, st.session_state.part_prompt = response(new_prompt, old_prompt, temperature=0.7, max_token=1024, past_messages=st.session_state.part_prompt, model="vistral-7b-chat", API_URL=api_url)
             print("#########################", st.session_state.part_prompt)

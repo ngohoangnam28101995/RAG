@@ -15,8 +15,8 @@ from src.ulti.chunk_text import chunk_text
 # Thư mục chứa files
 folder_path = "data/legal document"
 model = "vinai/phobert-base"
-chunk_size = 250
-overlap = 25
+chunk_size = 500
+overlap = 100
 
 # Hàm đọc file PDF
 def read_pdf(file_path):

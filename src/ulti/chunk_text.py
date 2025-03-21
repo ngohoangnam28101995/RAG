@@ -1,19 +1,25 @@
-def chunk_text(text, chunk_size=150, overlap_size=50):
-    """Cắt nội dung thành các đoạn có độ dài tối đa `chunk_size`, 
-    với phần chồng lấn `overlap_size` giữa các đoạn."""
-    
-    words = text.split()  # Tách văn bản thành danh sách từ
-    chunks = []
-    start = 0  # Vị trí bắt đầu của đoạn
-    
-    while start < len(words):
-        end = min(start + chunk_size, len(words))  # Giới hạn kích thước đoạn
-        chunk = " ".join(words[start:end])  # Tạo đoạn từ danh sách từ
-        
-        chunks.append(chunk)
-        start += chunk_size - overlap_size  # Dịch con trỏ đi, giữ lại phần chồng
-        
-        if start >= len(words):  # Nếu vị trí bắt đầu vượt quá danh sách từ, dừng lại
-            break
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import Document
+from typing import List
+import pandas as pd
 
-    return chunks
+def chunk_text(text: str, chunk_size: int = 150, overlap_size: int = 50) -> List[Document]:
+    """
+    Chia nhỏ văn bản thành các đoạn với kích thước chunk_size và phần chồng overlap_size.
+    
+    Parameters:
+        text (str): Văn bản đầu vào cần chia nhỏ.
+        chunk_size (int): Độ dài tối đa của mỗi đoạn.
+        overlap_size (int): Độ dài của phần chồng giữa các đoạn.
+
+    Returns:
+        List[str]: Danh sách các đoạn văn bản dưới dạng chuỗi.
+    """
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=overlap_size
+    )
+    
+    # Chuyển văn bản thành đối tượng Document
+    doc = Document(page_content=text)
+    
+    return [chunk.page_content for chunk in text_splitter.split_documents([doc])]

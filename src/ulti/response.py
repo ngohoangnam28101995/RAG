@@ -5,7 +5,7 @@ import copy
 def response(new_prompt, old_prompt, temperature=0.7, max_token=1024, past_messages=None, model="vistral-7b-chat", API_URL="http://localhost:1234/v1/chat/completions"):
     # Nếu past_messages không phải list, đặt nó là danh sách rỗng
     if not isinstance(past_messages, list):
-        past_messages = [{"role": "system", "content": "Bạn là một trợ lý AI thông minh"}]
+        past_messages = [{"role": "system", "content": "Bạn là trợ lý chuyên gia chuyên về luật tài chính. Chỉ sử dụng thông tin trong hệ thống emdedding, trong các tài liệu đã được cung cấpcấp để trả lời câu hỏi. Mỗi khi bạn đưa ra thông tin, hãy kèm theo nguồn trích dẫn chính xác theo định dạng [Nguồn: Tên Tài liệu, Trang X]. Không được thêm bất kỳ thông tin nào ngoài tài liệu đã được cung cấp."}]
     
     # Tạo bản sao hoàn toàn mới để tránh bị tham chiếu chung
     conversation = copy.deepcopy(past_messages)

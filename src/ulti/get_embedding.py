@@ -1,6 +1,5 @@
 import torch
 
-
 # Hàm tạo embedding vector từ PhoBERT trên GPU
 def get_embedding(text,model,tokenizer,device):
     tokens = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=256)
