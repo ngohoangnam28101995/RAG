@@ -21,10 +21,15 @@ load_dotenv()
 # Lấy giá trị API_URL
 api_url = os.getenv("API_URL")
 
-# Tải mô hình PhoBERT và Tokenizer
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-phobert = AutoModel.from_pretrained("vinai/phobert-base").to(device)
-tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base")
+@st.cache_resource
+def load_phobert():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = AutoModel.from_pretrained("vinai/phobert-base").to(device)
+    tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base")
+    return model, tokenizer, device
+
+# Load model và tokenizer một lần duy nhất
+phobert, tokenizer, device = load_phobert()
 
 # Load select box chọn kiểu chunking
 db_path = "chromadb"
@@ -62,11 +67,17 @@ selected_folder = st.selectbox(
     key="folder_select", 
     on_change=on_change
 )
+# Tạo ba cột
+col1, col2, col3 = st.columns(3)
+# Hiển thị toggle button trong từng cột
+with col1:
+    st.session_state.use_reader = st.toggle("Dùng reader", value=st.session_state.get("use_reader", False))
 
-# Toggle button để chọn có sử dụng reader hay không
-st.session_state.use_reader = st.toggle("Dùng reader", value=st.session_state.use_reader)
-st.session_state.use_hyde = st.toggle("Dùng hyde", value=st.session_state.use_reader)
-st.session_state.use_mmr = st.toggle("Dùng mmr", value=st.session_state.use_reader)
+with col2:
+    st.session_state.use_hyde = st.toggle("Dùng hyde", value=st.session_state.get("use_hyde", False))
+
+with col3:
+    st.session_state.use_mmr = st.toggle("Dùng mmr", value=st.session_state.get("use_mmr", False))
 
 # Khởi tạo ChromaDB lần đầu với DB mặc định
 client = chromadb.PersistentClient(path=f"chromadb/{st.session_state.select}")

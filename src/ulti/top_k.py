@@ -30,10 +30,13 @@ def top_k(query_text, db_collection, model, tokenizer, device, use_hyde=True, us
     retrieved_chunk = ""
     for i, meta in enumerate(results["metadatas"][0]):
         if retrieved_chunk == "":
-            retrieved_chunk = f"Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})"
+            #retrieved_chunk = f"Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})"
+            retrieved_chunk = f"Thông tư : {meta['filename']} {meta['content']}"
         else:
-            retrieved_chunk += "\n" + f"Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})"
-        print(f"🔍 Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})")
+            #retrieved_chunk += "\n" + f"Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})"
+            retrieved_chunk += "\n" + f"Thông tư : {meta['filename']} : {meta['content']}"
+        #print(f"🔍 Thông tin {i+1}: {meta['content']} (Tệp: {meta['filename']})")
+        print(f"Thông tư : {meta['filename']} : {meta['content']}")
 
     if use_reader:
         reader_prompt = f'''Bạn là một chuyên gia trong về lĩnh vực tài chính. 
@@ -44,20 +47,20 @@ def top_k(query_text, db_collection, model, tokenizer, device, use_hyde=True, us
                         
                         Với những thông tin được cung cấp trong "Các đoạn thông tin liên quan", đây là những thông tin được truy vấn với câu hỏi {query_text}.
                         Hãy tổng hợp các thông tin quan trọng một cách dễ hiểu, súc tích, đầy đủ nội dung chính và đảm bảo chúng giải đáp được câu hỏi {query_text}.
-                        Không sử dụng kiến thức bên ngoài. Mỗi câu trả lời cần kèm theo nguồn trích dẫn chính xác theo định dạng [Nguồn: Tên tài liệu, Trang X].
+                        Không sử dụng kiến thức bên ngoài. Mỗi câu trả lời cần kèm theo nguồn trích dẫn chính xác theo định dạng [Nguồn: Thông tư số ...].
                         **Câu hỏi:** {query_text}  
                         **Kết quả tóm tắt:**'''
         
         retrieved_chunk, _ = response(reader_prompt, reader_prompt, temperature=0.8, max_token=4096, past_messages=None, model="vistral-7b-chat", API_URL="http://localhost:1234/v1/chat/completions")
 
-    rag = f''' Bạn là một chuyên gia trong về lĩnh vực tài chính. 
+    rag = f''' Bạn là một chuyên gia giải đáp thắc mắc. 
             Thông tin ngữ cảnh:  
             --------------------   
             {retrieved_chunk}  
             -------------------- 
             
             Chỉ sử dụng thông tin trong "Thông tin ngữ cảnh" để trả lời: {query_text}. 
-            Không sử dụng kiến thức bên ngoài. Đảm bảo câu trả lời có nguồn trích dẫn chính xác [Nguồn: Tên tài liệu, Trang X].
+            Không sử dụng kiến thức bên ngoài. Đảm bảo câu trả lời có nguồn trích dẫn chính xác theo định dạng [Nguồn: Thông tư số ...].
             **Truy vấn:** {query_text}  
             **Câu trả lời:**'''
     
