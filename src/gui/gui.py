@@ -11,6 +11,9 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.ulti.response import response
 from src.ulti.top_k import top_k
+from src.ulti.check_json import extract_json_from_text
+from src.ulti.calling_function import process_function_call
+
 
 import os
 from dotenv import load_dotenv
@@ -50,7 +53,7 @@ if "use_hyde" not in st.session_state:
 if "use_mmr" not in st.session_state:
     st.session_state.use_mmr = True  # Giá trị mặc định
 
-st.title("Chatbot Luật Tài Chính")
+st.title("Chatbot Thông tư Tài Chính")
 
 # Hàm xử lý khi thay đổi selectbox
 def on_change():
@@ -110,6 +113,12 @@ if prompt := st.chat_input("Hãy nhập vào yêu cầu?"):
             new_prompt, old_prompt = top_k(prompt, collection, phobert, tokenizer, device, k=10, use_reader=st.session_state.use_reader,use_hyde=st.session_state.use_hyde,use_mmr=st.session_state.use_mmr)
             print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", new_prompt)
             simulated_response, st.session_state.part_prompt = response(new_prompt, old_prompt, temperature=0.7, max_token=1024, past_messages=st.session_state.part_prompt, model="vistral-7b-chat", API_URL=api_url)
+            #Check chuỗi json
+            print(simulated_response)
+            json_string = extract_json_from_text(simulated_response)
+            print(json_string)
+            if json_string != None:
+                simulated_response = process_function_call(json_string)
             print("#########################", st.session_state.part_prompt)
             with open("part_prompt.txt", "w", encoding="utf-8") as f:
                 f.write(str(st.session_state.part_prompt))

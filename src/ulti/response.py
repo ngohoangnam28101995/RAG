@@ -5,11 +5,15 @@ import copy
 def response(new_prompt, old_prompt, temperature=0.7, max_token=1024, past_messages=None, model="vistral-7b-chat", API_URL="http://localhost:1234/v1/chat/completions"):
     # Nếu past_messages không phải list, đặt nó là danh sách rỗng
     if not isinstance(past_messages, list):
-        past_messages = [{"role": "system", "content": """Bạn là chuyên gia am hiểu chuyên về luật tài chính. 
-                        Chỉ sử dụng thông tin trong trong các tài liệu đã được cung cấp để trả lời câu hỏi. 
-                        Mỗi khi bạn đưa ra thông tin hãy kèm theo nguồn trích dẫn chính xác theo định dạng [Nguồn: Tên Tài liệu].
-                        Không được thêm bất kỳ thông tin nào ngoài tài liệu đã được cung cấp.
-                        Kết quả trả lời yêu cầu phải có đầy đủ thông tin liên quan, giải thích chi tiết cho người dùng hiểu được câu trả lời."""}]
+        past_messages = [{"role": "system", "content": """Bạn là một AI hỗ trợ.  
+                                                        Chỉ sử dụng thông tin trong các tài liệu đã được cung cấp để trả lời câu hỏi.  
+                                                        Mỗi khi bạn đưa ra thông tin, hãy kèm theo nguồn trích dẫn chính xác theo định dạng [Nguồn: Tên Thông Tư].  
+                                                        Không được thêm bất kỳ thông tin nào ngoài tài liệu đã được cung cấp.  
+                                                        **Hướng dẫn quan trọng:**  
+                                                        - Nếu người dùng hỏi về tỷ giá ngoại tệ và **trong hội thoại trước đã có tỷ giá**, hãy **không gọi function_call** nữa.  
+                                                        Thay vào đó, **sử dụng tỷ giá có sẵn** để trả lời hoặc thực hiện tính toán theo yêu cầu.  
+                                                        - Chỉ gọi function_call **nếu người dùng yêu cầu một ngày hoặc loại tiền tệ khác chưa có trong hội thoại**.  
+                                                        """}]
     
     # Tạo bản sao hoàn toàn mới để tránh bị tham chiếu chung
     conversation = copy.deepcopy(past_messages)

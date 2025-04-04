@@ -23,9 +23,9 @@ def clean_text(text):
     # Thay nhiều khoảng trắng liên tiếp thành một khoảng trắng
     text = re.sub(r'\s+', ' ', text).strip()
      # Loại bỏ dấu `, . :`
-    text = re.sub(r"[-,.:;']", '', text)
+    text = re.sub(r"[-:;']", '', text)
     # Thay thế các ký tự đặc biệt bằng dấu cách
-    text = re.sub(r"[^\w\s,.()/%-]", " ", text)
+    text = re.sub(r"[^\w\s()/%-]", " ", text)
     # Chuẩn hóa khoảng trắng
     text = re.sub(r"\s+", " ", text).strip()
     #Loại kí tự xuống dòng

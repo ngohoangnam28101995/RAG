@@ -39,7 +39,7 @@ def top_k(query_text, db_collection, model, tokenizer, device, use_hyde=True, us
         print(f"Thông tư : {meta['filename']} : {meta['content']}")
 
     if use_reader:
-        reader_prompt = f'''Bạn là một chuyên gia trong về lĩnh vực tài chính. 
+        reader_prompt = f'''Bạn là một chuyên gia giải đáp thắc mắc dựa trên tài liệu được cung cấp.
                         Dưới đây là các đoạn thông tin liên quan được truy xuất:
                         ---------------------
                         {retrieved_chunk}
@@ -53,15 +53,36 @@ def top_k(query_text, db_collection, model, tokenizer, device, use_hyde=True, us
         
         retrieved_chunk, _ = response(reader_prompt, reader_prompt, temperature=0.8, max_token=4096, past_messages=None, model="vistral-7b-chat", API_URL="http://localhost:1234/v1/chat/completions")
 
-    rag = f''' Bạn là một chuyên gia giải đáp thắc mắc. 
-            Thông tin ngữ cảnh:  
-            --------------------   
-            {retrieved_chunk}  
-            -------------------- 
-            
-            Chỉ sử dụng thông tin trong "Thông tin ngữ cảnh" để trả lời: {query_text}. 
-            Không sử dụng kiến thức bên ngoài. Đảm bảo câu trả lời có nguồn trích dẫn chính xác theo định dạng [Nguồn: Thông tư số ...].
-            **Truy vấn:** {query_text}  
-            **Câu trả lời:**'''
+    rag = f'''Bạn là một chuyên gia giải đáp thắc mắc.
+
+Chỉ khi truy vấn hiện tại **trực tiếp liên quan đến tỷ giá** của một đơn vị tiền tệ (ví dụ: đô la Mỹ - USD, nhân dân tệ - CNY, yên Nhật - JPY...), hãy **KHÔNG trả lời trực tiếp**, mà thay vào đó **trả về đúng một đoạn JSON duy nhất**, không kèm bất kỳ văn bản nào khác, theo định dạng sau:
+
+{{
+  "function_call": {{
+    "name": "get_exchange_rate",
+    "arguments": {{ "date": "YYYY-MM-DD", "currency": "XXX" }}
+  }}
+}}
+
+Trong đó:
+- `date` là ngày mà người dùng yêu cầu tra cứu tỷ giá.
+- `currency` là mã tiền tệ quốc tế theo chuẩn ISO 4217 (ví dụ: `"USD"`, `"CNY"`, `"JPY"`).
+
+⚠️ Nếu truy vấn hiện tại KHÔNG hỏi về tỷ giá, hoặc đã chuyển sang chủ đề khác (dù các câu trước có nhắc đến tỷ giá), thì KHÔNG được `function_call`. Hãy trả lời như một chuyên gia bình thường dựa vào "Thông tin ngữ cảnh".
+
+---
+
+Thông tin ngữ cảnh:  
+--------------------   
+{retrieved_chunk}  
+-------------------- 
+
+Chỉ sử dụng thông tin trong "Thông tin ngữ cảnh" để trả lời: {query_text}.  
+Không sử dụng kiến thức bên ngoài. Đảm bảo câu trả lời có nguồn trích dẫn chính xác theo định dạng [Nguồn: Thông tư số ...].
+
+**Truy vấn hiện tại:** {query_text}  
+**Câu trả lời:**'''
+
+
     
     return rag, query_text
